@@ -1,6 +1,6 @@
 
 import pytest
-from cogs.deathroll import format_num
+from utils.deathroll_processing import format_num
 import math
 
 def test_format_num():

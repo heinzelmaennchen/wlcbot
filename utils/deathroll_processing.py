@@ -457,12 +457,12 @@ def calculate_player_stats(df, player_id):
     stats['min_prev_num_for_ratio'] = '{:.0f}'.format(min_prev_num_for_ratio)
     stats['min_curr_num_for_ratio'] = '{:.0f}'.format(min_curr_num_for_ratio)
     stats['max_match'] = '{:.0f}'.format(max(matching_rolls_list)) if matching_rolls_list else "N/A"
-    
+
     stats['avg_player_roll_pct_str'] = "N/A"
     if player_roll_ratios_all_games:
         avg_ratio_val = sum(player_roll_ratios_all_games) / len(player_roll_ratios_all_games)
         stats['avg_player_roll_pct_str'] = '{:.2f}%'.format(avg_ratio_val * 100)
-        
+
     stats['player_two_after_two_count'] = player_two_after_two_count
     stats['player_one_after_two_count'] = player_one_after_two_count
 
@@ -505,29 +505,30 @@ def generate_charts(df, player_names_map):
     sim_roll_percentages = (simulation / sim_total_rolls) * 100
 
     # Barplot
-    ax1.bar(df_barplot['rolls'], df_barplot['count'], color=bar_c, edgecolor='none')
+    ax1.bar(df_barplot['rolls'], df_barplot['count'], color=bar_c, edgecolor='none', label='Actual Games')
     ax1.set_xlabel('rolls', color=label_c)
     ax1.set_ylabel('count', color=label_c)
     ax1.set_title('How many rolls?', color=label_c)
     ax1.tick_params(axis='x', colors=label_c)
     ax1.tick_params(axis='y', colors=label_c)
     ax1.set_xticks(range(1, max_rolls + 1))
-    ax1.yaxis.set_major_locator(mticker.MultipleLocator(1))
+    ax1.yaxis.set_major_locator(mticker.MaxNLocator(nbins=20, integer=True))
     ax1.set_facecolor(figbg_c)
     ax1.grid(color=label_c, linestyle='-', linewidth=0.5, alpha=0.5)
     ax1.spines[:].set_color(label_c)
     ax1.set_xlim(xmin=0, xmax=max_rolls+1)
-    ax1.set_ylim(ymin=0, ymax=df_barplot['count'].max()+1)
 
-    axbell = ax1.twinx()
-    axbell.set_ylabel('probability of 100k simulated games', color=label_c)
-    axbell.plot(sim_roll_percentages.index, sim_roll_percentages.values,
-                marker='', linestyle='-', color='#9f3c3c')
-    axbell.tick_params(axis='y', colors=label_c)
-    axbell.set_yticks(range(0, int(sim_roll_percentages.max()+2)))
-    axbell.set_ylim(ymin=0, ymax=int(sim_roll_percentages.max()+1))
-    axbell.spines[:].set_color(label_c)
-    axbell.yaxis.set_major_formatter(mticker.PercentFormatter(decimals=0))
+    # Normalize simulation to total actual games
+    total_real_games = df_barplot['count'].sum()
+    sim_normalized_counts = (sim_roll_percentages / 100) * total_real_games
+
+    # Plot the simulated curve on the same axis
+    ax1.plot(sim_normalized_counts.index, sim_normalized_counts.values,
+             marker='', linestyle='-', color='#9f3c3c', label='simulated distribution')
+
+    # Optionally add a legend if helpful, or just rely on the existing colors
+    ax1.legend(labelcolor=label_c, facecolor=figbg_c,
+               edgecolor=label_c, fontsize='small')
 
     # Cumulative Win/Loss Line Plot per Player
     df_sorted = df.sort_values(by='datetime').reset_index(drop=True)
@@ -560,7 +561,7 @@ def generate_charts(df, player_names_map):
 
     fig2 = Figure(figsize=(8, 6), facecolor=figbg_c)
     ax2 = fig2.subplots()
-    fig2.subplots_adjust(left=0.1, right=0.75)
+    fig2.subplots_adjust(left=0.1, right=0.95, bottom=0.15)
 
     for i, pid in enumerate(all_players):
         cumulative = player_cumulative[pid]
@@ -583,7 +584,7 @@ def generate_charts(df, player_names_map):
     ax2.grid(color=label_c, linestyle='-', linewidth=0.5, alpha=0.3)
     ax2.spines[:].set_color(label_c)
     ax2.legend(labelcolor=label_c, facecolor=figbg_c, edgecolor=label_c,
-               fontsize='small', loc='center left', bbox_to_anchor=(1.02, 0.5))
+               fontsize='small', loc='upper center', bbox_to_anchor=(0.5, -0.10), ncol=8)
 
     # Duels HeatMap
     df_duels = df
@@ -611,7 +612,7 @@ def generate_charts(df, player_names_map):
     cmap_name = 'vs_colormap'
     cm = LinearSegmentedColormap.from_list(cmap_name, vs_colors, N=100)
     ax3.imshow(win_loss_pivot, cmap=cm, interpolation='nearest', vmin=0, vmax=1)
-    
+
     player_labels = [player_names_map.get(pid, f"ID:{pid}") for pid in players]
 
     ax3.set_xticks(np.arange(len(players)))
@@ -648,7 +649,7 @@ def generate_charts(df, player_names_map):
     # Data for Lineplot
     def get_rolls_list(sequence_string):
         return [int(roll) for roll in sequence_string.split('|')]
-    
+
     df_line = df.copy()
     df_line['rolls_list'] = df_line['sequence'].apply(get_rolls_list)
 
@@ -758,17 +759,17 @@ def generate_charts(df, player_names_map):
     ax4.plot(sorted_min_rolls.keys(), sorted_min_rolls.values(), linestyle='--', label='Minimum Roll Value', alpha=0.8, color='#9f3c3c')
     if min1:
         ax4.plot(range(0, len(shortest_game_rolls)), shortest_game_rolls, marker=11, linestyle='-',
-                    label=f'Shortest Game (Length: {len(shortest_game_rolls)-1})', linewidth=1, color='#9f3c3c')
+                 label=f'Shortest Game (Length: {len(shortest_game_rolls)-1})', linewidth=1, color='#9f3c3c')
     else:
         ax4.add_patch(min_patch)
     ax4.plot(sorted_max_rolls.keys(), sorted_max_rolls.values(), linestyle='--', label='Maximum Roll Value', alpha=0.8, color='#3c9f3c')
     if max1:
         ax4.plot(range(0, len(longest_game_rolls)), longest_game_rolls, marker=10, linestyle='-',
-                    label=f'Longest Game (Length: {len(longest_game_rolls)-1})', linewidth=1, color='#3c9f3c')
+                 label=f'Longest Game (Length: {len(longest_game_rolls)-1})', linewidth=1, color='#3c9f3c')
     else:
         ax4.add_patch(max_patch)
     ax4.plot(sorted_averages_rolls.keys(), sorted_averages_rolls.values(), marker='o',
-                linestyle='-', label='Average Roll Value', alpha=1, color=bar_c, markersize=3)
+             linestyle='-', label='Average Roll Value', alpha=1, color=bar_c, markersize=3)
 
     ax4.set_title('Average, Max, Min, Shortest & Longest Game Roll Values', color=label_c)
     ax4.set_xlabel('roll number', color=label_c)
