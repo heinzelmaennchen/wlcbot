@@ -479,7 +479,7 @@ def generate_charts(df, player_names_map):
                  (0.5, '#9f9f3c'), (0.75, '#3c9f3c'), (1, '#3c9f3c')]
 
     # Create figure 1
-    fig1 = Figure(figsize=(8, 6), facecolor=figbg_c)
+    fig1 = Figure(figsize=(10, 7.5), facecolor=figbg_c)
     ax1 = fig1.subplots()
     fig1.subplots_adjust(left=0.1, right=0.88)
 
@@ -505,14 +505,14 @@ def generate_charts(df, player_names_map):
     sim_roll_percentages = (simulation / sim_total_rolls) * 100
 
     # Barplot
-    ax1.bar(df_barplot['rolls'], df_barplot['count'], color=bar_c, edgecolor='none', label='Actual Games')
+    ax1.bar(df_barplot['rolls'], df_barplot['count'], color=bar_c, edgecolor='none', label='actual games')
     ax1.set_xlabel('rolls', color=label_c)
     ax1.set_ylabel('count', color=label_c)
     ax1.set_title('How many rolls?', color=label_c)
     ax1.tick_params(axis='x', colors=label_c)
     ax1.tick_params(axis='y', colors=label_c)
     ax1.set_xticks(range(1, max_rolls + 1))
-    ax1.yaxis.set_major_locator(mticker.MaxNLocator(nbins=20, integer=True))
+    ax1.yaxis.set_major_locator(mticker.MaxNLocator(nbins=30, integer=True))
     ax1.set_facecolor(figbg_c)
     ax1.grid(color=label_c, linestyle='-', linewidth=0.5, alpha=0.5)
     ax1.spines[:].set_color(label_c)
@@ -559,7 +559,7 @@ def generate_charts(df, player_names_map):
         '#808000', '#ffd8b1', '#000075', '#a9a9a9', '#ffffff'
     ]
 
-    fig2 = Figure(figsize=(8, 6), facecolor=figbg_c)
+    fig2 = Figure(figsize=(10, 7.5), facecolor=figbg_c)
     ax2 = fig2.subplots()
     fig2.subplots_adjust(left=0.1, right=0.95, bottom=0.15)
 
@@ -607,7 +607,7 @@ def generate_charts(df, player_names_map):
     win_loss_df = pd.DataFrame(results)
     win_loss_pivot = win_loss_df.pivot(index='Spieler1', columns='Spieler2', values='Siegquote')
 
-    fig3 = Figure(figsize=(8, 6), facecolor=figbg_c)
+    fig3 = Figure(figsize=(10, 7.5), facecolor=figbg_c)
     ax3 = fig3.subplots()
     cmap_name = 'vs_colormap'
     cm = LinearSegmentedColormap.from_list(cmap_name, vs_colors, N=100)
@@ -753,7 +753,7 @@ def generate_charts(df, player_names_map):
     sorted_max_rolls = dict(sorted(max_rolls.items()))
     sorted_min_rolls = dict(sorted(min_rolls.items()))
 
-    fig4 = Figure(figsize=(8, 6), facecolor=figbg_c)
+    fig4 = Figure(figsize=(10, 7.5), facecolor=figbg_c)
     ax4 = fig4.subplots()
 
     ax4.plot(sorted_min_rolls.keys(), sorted_min_rolls.values(), linestyle='--', label='Minimum Roll Value', alpha=0.8, color='#9f3c3c')
